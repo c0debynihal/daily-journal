@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Daily Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f5f2ec;
+    --surface: #fdfaf5;
+    --surface2: #f0ece3;
+    --ink: #1a1714;
+    --ink2: #6b6560;
+    --ink3: #a09a93;
+    --accent: #c4743a;
+    --accent-bg: #fdf0e6;
+    --success: #4a7c59;
+    --success-bg: #edf5f0;
+    --border: rgba(26,23,20,0.1);
+    --border2: rgba(26,23,20,0.18);
+    --radius: 12px;
+    --radius-sm: 8px;
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --bg: #141210;
+    --surface: #1e1c19;
+    --surface2: #2a2722;
+    --ink: #f0ece4;
+    --ink2: #9e9890;
+    --ink3: #635e58;
+    --accent: #d4844a;
+    --accent-bg: #2a1e12;
+    --success: #5a9a6a;
+    --success-bg: #162019;
+    --border: rgba(240,236,228,0.08);
+    --border2: rgba(240,236,228,0.14);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+  }
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .logo span { color: var(--accent); font-style: italic; }
+  .header-date {
+    font-size: 0.8rem;
+    color: var(--ink3);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Date navigation */
+  .date-nav {
+    max-width: 720px;
+    margin: 2rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border2);
+    border-radius: 50%;
+    background: var(--surface);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    color: var(--ink2);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover { background: var(--surface2); color: var(--ink); }
+  .date-center { text-align: center; flex: 1; }
+  .date-main {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .date-sub { font-size: 0.8rem; color: var(--ink3); margin-top: 2px; }
+  .streak-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1px solid rgba(196,116,58,0.2);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Main */
+  main {
+    max-width: 720px;
+    margin: 1.5rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(1) { animation-delay: 0.03s; }
+  .card:nth-child(2) { animation-delay: 0.06s; }
+  .card:nth-child(3) { animation-delay: 0.09s; }
+  .card:nth-child(4) { animation-delay: 0.12s; }
+  .card:nth-child(5) { animation-delay: 0.15s; }
+
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Mood */
+  .mood-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mood-btn {
+    border: 1px solid var(--border2);
+    border-radius: 30px;
+    padding: 7px 16px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--ink2);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    font-weight: 400;
+  }
+  .mood-btn:hover { background: var(--surface2); }
+  .mood-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* Habits */
+  .habits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .habit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .habit-item:hover { background: var(--surface2); }
+  .habit-item.done {
+    background: var(--success-bg);
+    border-color: rgba(74,124,89,0.25);
+  }
+  .habit-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border2);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .habit-item.done .habit-check {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+  .habit-label { font-size: 0.875rem; color: var(--ink2); }
+  .habit-item.done .habit-label { color: var(--success); }
+
+  /* Tasks */
+  #tasks-list { display: flex; flex-direction: column; gap: 6px; }
+  .task-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .task-cb {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border2);
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    background: var(--surface);
+    transition: all 0.15s;
+  }
+  .task-cb:checked {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .task-cb:checked::after {
+    content: '✓';
+    position: absolute;
+    font-size: 11px;
+    color: white;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .task-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .task-input:focus { border-bottom-color: var(--border2); }
+  .task-input::placeholder { color: var(--ink3); }
+  .task-input.done-text { text-decoration: line-through; color: var(--ink3); }
+  .task-del {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink3); font-size: 1rem;
+    padding: 2px 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    line-height: 1;
+  }
+  .task-row:hover .task-del { opacity: 1; }
+  .task-del:hover { color: #c0392b; }
+  .add-task-btn {
+    margin-top: 8px;
+    background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink3);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+  .add-task-btn:hover { color: var(--accent); }
+
+  /* Health */
+  .health-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .health-field { display: flex; flex-direction: column; gap: 5px; }
+  .health-label {
+    font-size: 0.75rem;
+    color: var(--ink3);
+    letter-spacing: 0.03em;
+  }
+  .health-input {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .health-input:focus { border-color: var(--accent); }
+  .health-input::placeholder { color: var(--ink3); }
+
+  /* Notes */
+  .notes-area {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--ink);
+    background: var(--surface);
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .notes-area:focus { border-color: var(--accent); }
+  .notes-area::placeholder { color: var(--ink3); font-style: italic; }
+
+  /* Save */
+  .save-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 0.5rem;
+  }
+  .save-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .save-btn:hover { background: var(--accent); }
+  .save-status {
+    font-size: 0.85rem;
+    color: var(--success);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .save-status.show { opacity: 1; }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border2);
+    border-radius: 50%;
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: var(--ink2);
+  }
+  .theme-toggle:hover { background: var(--surface); color: var(--ink); }
+    header { padding: 1rem; }
+    .date-nav, main { padding: 0 1rem; }
+    .habits-grid, .health-grid { grid-template-columns: 1fr; }
+    .date-main { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">daily<span>.</span></div>
+  <div class="header-right">
+    <div class="header-date" id="header-date"></div>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light mode">☀️</button>
+  </div>
+</header>
+
+<div class="date-nav">
+  <button class="nav-btn" id="prev-day" aria-label="Previous day">&#8592;</button>
+  <div class="date-center">
+    <div class="date-main" id="date-main"></div>
+    <div class="date-sub" id="date-sub"></div>
+    <div id="streak-area"></div>
+  </div>
+  <button class="nav-btn" id="next-day" aria-label="Next day">&#8594;</button>
+</div>
+
+<main id="main-content">
+  <!-- Mood -->
+  <div class="card">
+    <div class="card-title">Mood</div>
+    <div class="mood-grid" id="mood-row">
+      <button class="mood-btn" data-mood="great">😄 Great</button>
+      <button class="mood-btn" data-mood="good">🙂 Good</button>
+      <button class="mood-btn" data-mood="okay">😐 Okay</button>
+      <button class="mood-btn" data-mood="low">😔 Low</button>
+      <button class="mood-btn" data-mood="rough">😩 Rough</button>
+    </div>
+  </div>
+
+  <!-- Habits -->
+  <div class="card">
+    <div class="card-title">Habits</div>
+    <div class="habits-grid" id="habits-grid">
+      <div class="habit-item" data-habit="water"><div class="habit-check" id="hc-water"></div><span class="habit-label">💧 Water</span></div>
+      <div class="habit-item" data-habit="exercise"><div class="habit-check" id="hc-exercise"></div><span class="habit-label">🏃 Exercise</span></div>
+      <div class="habit-item" data-habit="sleep"><div class="habit-check" id="hc-sleep"></div><span class="habit-label">😴 Sleep 7h+</span></div>
+      <div class="habit-item" data-habit="meditate"><div class="habit-check" id="hc-meditate"></div><span class="habit-label">🧘 Meditate</span></div>
+      <div class="habit-item" data-habit="read"><div class="habit-check" id="hc-read"></div><span class="habit-label">📖 Read</span></div>
+      <div class="habit-item" data-habit="noscreen"><div class="habit-check" id="hc-noscreen"></div><span class="habit-label">📵 No screens 1h</span></div>
+    </div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="card">
+    <div class="card-title">Tasks</div>
+    <div id="tasks-list"></div>
+    <button class="add-task-btn" id="add-task">+ Add task</button>
+  </div>
+
+  <!-- Health -->
+  <div class="card">
+    <div class="card-title">Health</div>
+    <div class="health-grid">
+      <div class="health-field"><label class="health-label">Steps</label><input class="health-input" type="number" id="h-steps" placeholder="e.g. 8000" /></div>
+      <div class="health-field"><label class="health-label">Water (glasses)</label><input class="health-input" type="number" id="h-water" placeholder="e.g. 8" /></div>
+      <div class="health-field"><label class="health-label">Sleep (hours)</label><input class="health-input" type="number" step="0.5" id="h-sleep" placeholder="e.g. 7.5" /></div>
+      <div class="health-field"><label class="health-label">Weight (lbs)</label><input class="health-input" type="number" step="0.1" id="h-weight" placeholder="e.g. 160" /></div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <textarea class="notes-area" id="notes" placeholder="How was your day? Any reflections, wins, or things to remember…" rows="4"></textarea>
+  </div>
+
+  <div class="save-row">
+    <span class="save-status" id="save-status">✓ Saved</span>
+    <button class="save-btn" id="save-btn">Save entry</button>
+  </div>
+</main>
+
+<script>
+  // Theme
+  const root = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  let theme = localStorage.getItem('dj_theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  function applyTheme(t) {
+    theme = t;
+    root.setAttribute('data-theme', t);
+    toggleBtn.textContent = t === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('dj_theme', t);
+  }
+
+  toggleBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+  applyTheme(theme);
+
+  let currentDate = new Date();
+  currentDate.setHours(0,0,0,0);
+  let mood = null, habits = {}, tasks = [], health = {}, notes = '';
+
+  function dateKey(d) { return 'entry_' + d.toISOString().slice(0,10); }
+
+  function formatMain(d) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((d - today) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === -1) return 'Yesterday';
+    if (diff === 1) return 'Tomorrow';
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  }
+
+  function formatSub(d) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((d - today) / 86400000);
+    if (Math.abs(diff) <= 1) return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    return '';
+  }
+
+  function loadEntry() {
+    try {
+      const raw = localStorage.getItem(dateKey(currentDate));
+      const data = raw ? JSON.parse(raw) : {};
+      mood = data.mood || null;
+      habits = data.habits || {};
+      tasks = data.tasks || [];
+      health = data.health || {};
+      notes = data.notes || '';
+    } catch(e) {
+      mood = null; habits = {}; tasks = []; health = {}; notes = '';
+    }
+    renderAll();
+  }
+
+  function saveEntry() {
+    try {
+      localStorage.setItem(dateKey(currentDate), JSON.stringify({ mood, habits, tasks, health, notes }));
+      const s = document.getElementById('save-status');
+      s.classList.add('show');
+      setTimeout(() => s.classList.remove('show'), 2000);
+    } catch(e) {}
+  }
+
+  function computeStreak() {
+    let streak = 0, d = new Date(currentDate);
+    for (let i = 0; i < 365; i++) {
+      if (localStorage.getItem(dateKey(d))) { streak++; d.setDate(d.getDate()-1); } else break;
+    }
+    const area = document.getElementById('streak-area');
+    area.innerHTML = streak > 1 ? `<span class="streak-badge">🔥 ${streak}-day streak</span>` : '';
+  }
+
+  function renderAll() {
+    document.getElementById('date-main').textContent = formatMain(currentDate);
+    document.getElementById('date-sub').textContent = formatSub(currentDate);
+    document.getElementById('header-date').textContent = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    renderMood(); renderHabits(); renderTasks(); renderHealth();
+    document.getElementById('notes').value = notes;
+    computeStreak();
+    // re-trigger animation
+    const main = document.getElementById('main-content');
+    main.querySelectorAll('.card').forEach((c,i) => {
+      c.style.animation = 'none';
+      c.offsetHeight;
+      c.style.animation = `fadeUp 0.3s ease ${i*0.04}s both`;
+    });
+  }
+
+  function renderMood() {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === mood));
+  }
+
+  function renderHabits() {
+    ['water','exercise','sleep','meditate','read','noscreen'].forEach(k => {
+      const item = document.querySelector(`.habit-item[data-habit="${k}"]`);
+      const check = document.getElementById('hc-'+k);
+      if (habits[k]) { item.classList.add('done'); check.textContent = '✓'; }
+      else { item.classList.remove('done'); check.textContent = ''; }
+    });
+  }
+
+  function renderTasks() {
+    const list = document.getElementById('tasks-list');
+    list.innerHTML = '';
+    tasks.forEach((task, i) => {
+      const row = document.createElement('div');
+      row.className = 'task-row';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'task-cb'; cb.checked = task.done;
+      cb.addEventListener('change', () => { tasks[i].done = cb.checked; inp.classList.toggle('done-text', cb.checked); });
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'task-input' + (task.done ? ' done-text' : '');
+      inp.value = task.text; inp.placeholder = 'Task…';
+      inp.addEventListener('input', () => tasks[i].text = inp.value);
+      const del = document.createElement('button');
+      del.className = 'task-del'; del.textContent = '×';
+      del.addEventListener('click', () => { tasks.splice(i,1); renderTasks(); });
+      row.appendChild(cb); row.appendChild(inp); row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+
+  function renderHealth() {
+    document.getElementById('h-steps').value = health.steps || '';
+    document.getElementById('h-water').value = health.water || '';
+    document.getElementById('h-sleep').value = health.sleep || '';
+    document.getElementById('h-weight').value = health.weight || '';
+  }
+
+  // Events
+  document.querySelectorAll('.mood-btn').forEach(b => b.addEventListener('click', () => {
+    mood = mood === b.dataset.mood ? null : b.dataset.mood; renderMood();
+  }));
+  document.querySelectorAll('.habit-item').forEach(item => item.addEventListener('click', () => {
+    const k = item.dataset.habit; habits[k] = !habits[k]; renderHabits();
+  }));
+  document.getElementById('add-task').addEventListener('click', () => {
+    tasks.push({ text: '', done: false }); renderTasks();
+    const inputs = document.querySelectorAll('.task-input');
+    if (inputs.length) inputs[inputs.length-1].focus();
+  });
+  ['steps','water','sleep','weight'].forEach(k => {
+    document.getElementById('h-'+k).addEventListener('input', e => health[k] = e.target.value);
+  });
+  document.getElementById('notes').addEventListener('input', e => notes = e.target.value);
+  document.getElementById('save-btn').addEventListener('click', saveEntry);
+  document.getElementById('prev-day').addEventListener('click', () => { currentDate.setDate(currentDate.getDate()-1); loadEntry(); });
+  document.getElementById('next-day').addEventListener('click', () => { currentDate.setDate(currentDate.getDate()+1); loadEntry(); });
+
+  // Autosave on blur
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveEntry(); });
+
+  loadEntry();
+</script>
+</body>
+</html>
